@@ -17,5 +17,10 @@ public enum AccountHolderType {
     /**
      * A user or account added by another plugin.
      */
-    THIRD_PARTY_PLUGIN;
+    THIRD_PARTY_PLUGIN,
+
+    /**
+     * Inert reference object. This only appears during IO operations.
+     */
+    INERT_REF;
 }

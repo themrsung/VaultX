@@ -5,7 +5,7 @@ package com.themrsung.mc.economy.property;
  *
  * @param <T> The object to designate
  */
-public abstract class ObjectProperty<T> implements AccountHolderProperty {
+public abstract class ObjectProperty<T> implements AccountHolderProperty<T> {
     /**
      * Local constructor.
      *

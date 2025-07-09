@@ -13,19 +13,22 @@ import java.util.stream.Stream;
  * Abstract class for account holder implementations.
  */
 public abstract class VXAbstractAccountHolder implements VXAccountHolder {
+    /**
+     * Default constructor.
+     */
     public VXAbstractAccountHolder() {
         this.properties = new HashSet<>();
     }
 
-    protected final Set<AccountHolderProperty> properties;
+    protected final Set<AccountHolderProperty<?>> properties;
 
     @Override
-    public @NotNull Stream<AccountHolderProperty> getProperties() {
+    public @NotNull Stream<AccountHolderProperty<?>> getProperties() {
         return properties.stream();
     }
 
     @Override
-    public @Nullable AccountHolderProperty getProperty(String name) {
+    public @Nullable AccountHolderProperty<?> getProperty(String name) {
         return properties.stream()
                 .filter(p -> Objects.equals(p.getName(), name))
                 .findAny()
@@ -33,7 +36,7 @@ public abstract class VXAbstractAccountHolder implements VXAccountHolder {
     }
 
     @Override
-    public boolean addProperty(AccountHolderProperty property) {
+    public boolean addProperty(AccountHolderProperty<?> property) {
         if (properties.stream().anyMatch(p -> Objects.equals(p.getName(), property.getName()))) {
             return false;
         }
@@ -42,7 +45,7 @@ public abstract class VXAbstractAccountHolder implements VXAccountHolder {
     }
 
     @Override
-    public boolean removeProperty(AccountHolderProperty property) {
+    public boolean removeProperty(AccountHolderProperty<?> property) {
         return properties.remove(property);
     }
 

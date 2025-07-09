@@ -15,4 +15,9 @@ public class HolderProperty extends ObjectProperty<VXAccountHolder> {
     HolderProperty(String name, VXAccountHolder value) {
         super(name, value);
     }
+
+    @Override
+    public AccountHolderPropertyType getType() {
+        return AccountHolderPropertyType.HOLDER;
+    }
 }

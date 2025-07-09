@@ -13,4 +13,9 @@ public class StringProperty extends ObjectProperty<String> {
     StringProperty(String name, String value) {
         super(name, value);
     }
+
+    @Override
+    public AccountHolderPropertyType getType() {
+        return AccountHolderPropertyType.STRING;
+    }
 }

@@ -33,7 +33,7 @@ class VXInstitutionImpl extends VXAbstractAccountHolder implements VXInstitution
     private final UUID uniqueId;
     private String name;
     private OfflinePlayer owner;
-    private final Set<OfflinePlayer> members;
+    final Set<OfflinePlayer> members;
     double balance;
     long premiumBalance;
 

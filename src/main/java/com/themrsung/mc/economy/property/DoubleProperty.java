@@ -3,7 +3,7 @@ package com.themrsung.mc.economy.property;
 /**
  * {@code double} property.
  */
-public class DoubleProperty implements AccountHolderProperty {
+public class DoubleProperty extends ObjectProperty<Double> {
     /**
      * Local constructor.
      *
@@ -11,22 +11,11 @@ public class DoubleProperty implements AccountHolderProperty {
      * @param value The value of this property
      */
     DoubleProperty(String name, double value) {
-        this.name = name;
-        this.value = value;
+        super(name, value);
     }
 
-    protected final String name;
-    protected double value;
-
-    public String getName() {
-        return name;
-    }
-
-    public double getValue() {
-        return value;
-    }
-
-    public void setValue(double value) {
-        this.value = value;
+    @Override
+    public AccountHolderPropertyType getType() {
+        return AccountHolderPropertyType.DOUBLE;
     }
 }

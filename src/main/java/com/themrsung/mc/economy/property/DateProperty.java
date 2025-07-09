@@ -1,21 +1,23 @@
 package com.themrsung.mc.economy.property;
 
+import java.util.Date;
+
 /**
- * {@code long} property.
+ * {@link Date} property.
  */
-public class LongProperty extends ObjectProperty<Long> {
+public class DateProperty extends ObjectProperty<Date> {
     /**
      * Local constructor.
      *
      * @param name  The name of this property
      * @param value The value of this property
      */
-    LongProperty(String name, long value) {
+    DateProperty(String name, Date value) {
         super(name, value);
     }
 
     @Override
     public AccountHolderPropertyType getType() {
-        return AccountHolderPropertyType.LONG;
+        return AccountHolderPropertyType.DATE;
     }
 }

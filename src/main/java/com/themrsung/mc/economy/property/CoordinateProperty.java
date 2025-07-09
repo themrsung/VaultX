@@ -15,4 +15,9 @@ public class CoordinateProperty extends ObjectProperty<Coordinate> {
     CoordinateProperty(String name, Coordinate value) {
         super(name, value);
     }
+
+    @Override
+    public AccountHolderPropertyType getType() {
+        return AccountHolderPropertyType.COORDINATE;
+    }
 }

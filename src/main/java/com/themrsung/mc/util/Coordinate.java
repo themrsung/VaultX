@@ -92,4 +92,9 @@ public class Coordinate {
         return Objects.equals(worldName, c.worldName)
                 && x == c.x && y == c.y && z == c.z;
     }
+
+    @Override
+    public String toString() {
+        return "{" + worldName + ", [" + x + ", " + y + ", " + z + "]}";
+    }
 }

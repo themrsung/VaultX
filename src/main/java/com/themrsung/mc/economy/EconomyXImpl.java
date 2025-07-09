@@ -1,7 +1,5 @@
 package com.themrsung.mc.economy;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.themrsung.mc.VaultX;
 import com.themrsung.mc.event.balance.BalanceIssuedEvent;
 import com.themrsung.mc.event.balance.BalanceRetiredEvent;
@@ -231,14 +229,7 @@ class EconomyXImpl implements EconomyX {
         var dir = new File(savePath);
         dir.mkdirs();
 
-        var mapper = new ObjectMapper(new YAMLFactory());
 
-        for (VXAccountHolder a : accounts) {
-            if (!(a instanceof VXPluginUser)) {
-                var file = new File(savePath + "/" + a.getUniqueId() + ".yml");
-                mapper.writeValue(file, a);
-            }
-        }
     }
 
     @Override

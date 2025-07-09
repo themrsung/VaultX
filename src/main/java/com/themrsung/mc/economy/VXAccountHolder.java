@@ -65,7 +65,7 @@ public interface VXAccountHolder {
      *
      * @return A stream of the properties of this holder
      */
-    @NotNull Stream<AccountHolderProperty> getProperties();
+    @NotNull Stream<AccountHolderProperty<?>> getProperties();
 
     /**
      * Returns the property of matching name. This operation is case-sensitive.
@@ -73,7 +73,7 @@ public interface VXAccountHolder {
      * @param name The name of the property
      * @return The property if found, {@code null} otherwise
      */
-    @Nullable AccountHolderProperty getProperty(String name);
+    @Nullable AccountHolderProperty<?> getProperty(String name);
 
     /**
      * Adds the property to this account holder. This operation will fail if there is already a property
@@ -82,7 +82,7 @@ public interface VXAccountHolder {
      * @param property The property to add
      * @return {@code true} if the property was added successfully
      */
-    boolean addProperty(AccountHolderProperty property);
+    boolean addProperty(AccountHolderProperty<?> property);
 
     /**
      * Removes the property from this account holder.
@@ -90,7 +90,7 @@ public interface VXAccountHolder {
      * @param property The property to remove
      * @return {@code true} if the property was removed successfully
      */
-    boolean removeProperty(AccountHolderProperty property);
+    boolean removeProperty(AccountHolderProperty<?> property);
 
     /**
      * Removes the property from this account holder.
