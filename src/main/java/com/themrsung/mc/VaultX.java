@@ -118,6 +118,9 @@ public final class VaultX extends JavaPlugin {
         unregisterEconomyService();
         getLogger().info("Economy service unregistered!");
 
+        legacyEnabled = false;
+        getLogger().info("Transient variables reset!");
+
         getLogger().info("VaultX disabled!");
     }
 
