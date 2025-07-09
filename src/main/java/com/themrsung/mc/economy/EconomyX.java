@@ -39,7 +39,7 @@ public interface EconomyX {
      * @param vx The {@link VaultX plugin}
      * @return The new instance
      */
-    static EconomyVX newVXInstance(VaultX vx) {
+    static EconomyX newVXInstance(VaultX vx) {
         return new EconomyVXImpl(vx);
     }
 

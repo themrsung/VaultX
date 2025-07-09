@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class VXEconomyLoader {
+public abstract class VXEconomyLoader {
     /**
      * Continues deserialization from VXIO.
      *
@@ -90,5 +90,13 @@ public class VXEconomyLoader {
         institution.properties.addAll(properties);
 
         return institution;
+    }
+
+    /**
+     * Prevents instantiation.
+     * @throws Exception Always
+     */
+    private VXEconomyLoader() throws Exception {
+        throw new Exception("Cannot instantiate utility class.");
     }
 }
