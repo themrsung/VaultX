@@ -2,11 +2,14 @@ package com.themrsung.mc;
 
 import com.themrsung.mc.economy.EconomyVX;
 import com.themrsung.mc.economy.EconomyX;
+import com.themrsung.mc.task.AutoSaveTask;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
 
 /**
  * <b>Vault Extended</b>
@@ -49,6 +52,26 @@ public final class VaultX extends JavaPlugin {
         registerEconomyService();
         getLogger().info("EconomyX registered to services manager!");
 
+        // Attempt to load data
+        try {
+            economy.load();
+            getLogger().info("Data loaded from disk!");
+        } catch (IOException e) {
+            getLogger().warning("Error loading data: " + e.getMessage());
+        }
+
+        // Register autosave task
+        var autoSaveInterval = getConfig().getLong("autoSaveInterval");
+
+        // Negative interval means autosave is disabled (no idea why anyone would do such thing)
+        if (autoSaveInterval > -1) {
+            getServer().getScheduler().scheduleSyncRepeatingTask(
+                    this,
+                    new AutoSaveTask(this),
+                    autoSaveInterval != 0 ? autoSaveInterval : 5 * 60 * 20,
+                    60 * 20);
+        }
+
         getLogger().info("VaultX loaded!");
     }
 
@@ -79,6 +102,13 @@ public final class VaultX extends JavaPlugin {
     @Override
     public void onDisable() {
         getLogger().info("Disabling VaultX...");
+
+        try {
+            economy.save();
+            getLogger().info("Data saved to disk!");
+        } catch (IOException e) {
+            getLogger().warning("Error saving data: " + e.getMessage());
+        }
 
         if (economy instanceof EconomyVX vx) {
             getServer().getServicesManager().unregister(vx);

@@ -8,6 +8,7 @@ import com.themrsung.mc.event.premium.PremiumBalanceIssuedEvent;
 import com.themrsung.mc.event.premium.PremiumBalanceRetiredEvent;
 import com.themrsung.mc.event.premium.PremiumBalanceTransferredEvent;
 import com.themrsung.mc.exception.UnknownAccountHolderImplementationException;
+import com.themrsung.mc.io.VXIO;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -229,14 +231,39 @@ class EconomyXImpl implements EconomyX {
         var dir = new File(savePath);
         dir.mkdirs();
 
+        for (var account : accounts) {
+            if (account.getType() == AccountHolderType.THIRD_PARTY_PLUGIN || account.getType() == AccountHolderType.INERT_REF)
+                continue;
 
+            var file = new File(savePath + "/" + account.getUniqueId() + ".yml");
+            var lines = VXIO.serializeAccountHolder(account);
+
+            Files.write(file.toPath(), lines);
+        }
     }
 
     @Override
     public void load() throws IOException {
+        var dir = new File(savePath);
+        if (!dir.exists()) {
+            dir.mkdirs();
+            return; // Nothing to load
+        }
 
+        var files = dir.listFiles((d, name) -> name.endsWith(".yml"));
+        if (files == null) return; // Nothing to load
 
-        // Third-party users should not be removed
+        // Clear users, but third-party users should not be removed
         accounts.removeIf(a -> !(a instanceof VXPluginUser));
+
+        for (var file : files) {
+            var lines = Files.readAllLines(file.toPath());
+            var account = VXIO.deserializeAccountHolder(lines);
+            if (account == null) continue;
+
+            accounts.add(account);
+        }
+
+        VXIO.reviveRefs(accounts);
     }
 }
