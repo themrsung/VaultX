@@ -4,7 +4,6 @@ import com.themrsung.mc.economy.EconomyX;
 import com.themrsung.mc.listener.PlayerAccountInitializationListener;
 import com.themrsung.mc.task.AutoSaveTask;
 import com.themrsung.mc.util.VaultLegacyLoader;
-import com.themrsung.mc.util.VaultXConfiguration;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
