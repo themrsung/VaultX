@@ -1,8 +1,10 @@
 package com.themrsung.mc;
 
 import com.themrsung.mc.economy.EconomyX;
+import com.themrsung.mc.listener.PlayerAccountInitializationListener;
 import com.themrsung.mc.task.AutoSaveTask;
 import com.themrsung.mc.util.VaultLegacyLoader;
+import com.themrsung.mc.util.VaultXConfiguration;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,6 +18,7 @@ import java.io.IOException;
  */
 public final class VaultX extends JavaPlugin {
     private EconomyX economy;
+    private VaultXConfiguration config;
     private boolean legacyEnabled;
 
     /**
@@ -29,6 +32,7 @@ public final class VaultX extends JavaPlugin {
 
     /**
      * Returns whether legacy Vault API support is enabled.
+     *
      * @return {@code true} if legacy Vault is supported at this time
      */
     public boolean isLegacyEnabled() {
@@ -38,6 +42,18 @@ public final class VaultX extends JavaPlugin {
     @Override
     public void onEnable() {
         getLogger().info("Loading VaultX...");
+
+        // Create configuration if absent
+        saveDefaultConfig();
+
+        // Load configuration
+        loadConfig();
+        getLogger().info("Configuration loaded!");
+
+        // Config should be non-null by now, but just in case
+        if (config == null) {
+            config = new VaultXConfiguration();
+        }
 
         // Try to find legacy Vault API
         var legacyVault = Bukkit.getPluginManager().getPlugin("Vault");
@@ -77,7 +93,24 @@ public final class VaultX extends JavaPlugin {
                 5 * 60 * 20,
                 60 * 20);
 
+        // Register player first join listener
+        getServer().getPluginManager().registerEvents(new PlayerAccountInitializationListener(this), this);
+
+        getLogger().info("Tasks and listeners registered!");
+
         getLogger().info("VaultX loaded!");
+    }
+
+    private void loadConfig() {
+        var autoSaveInterval = getConfig().getLong("autoSaveInterval", 6000);
+        var startingBalance = getConfig().getDouble("startingBalance", 100000);
+        var startingPremiumBalance = getConfig().getLong("startingPremiumBalance", 5);
+
+        config = new VaultXConfiguration(
+                autoSaveInterval,
+                startingBalance,
+                startingPremiumBalance
+        );
     }
 
     private void loadVanillaEconomy() {

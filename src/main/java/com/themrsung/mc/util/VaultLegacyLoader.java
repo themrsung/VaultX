@@ -12,8 +12,9 @@ import org.bukkit.plugin.ServicePriority;
 public abstract class VaultLegacyLoader {
     /**
      * Registers economy to server.
+     *
      * @param economy The economy
-     * @param vx The plugin instance
+     * @param vx      The plugin instance
      */
     public static void registerVXtoVault(EconomyX economy, VaultX vx) {
         vx.getServer().getServicesManager().register(
@@ -26,6 +27,7 @@ public abstract class VaultLegacyLoader {
 
     /**
      * Prevents instantiation.
+     *
      * @throws Exception Always
      */
     private VaultLegacyLoader() throws Exception {

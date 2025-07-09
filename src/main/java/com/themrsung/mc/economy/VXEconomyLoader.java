@@ -94,6 +94,7 @@ public abstract class VXEconomyLoader {
 
     /**
      * Prevents instantiation.
+     *
      * @throws Exception Always
      */
     private VXEconomyLoader() throws Exception {
