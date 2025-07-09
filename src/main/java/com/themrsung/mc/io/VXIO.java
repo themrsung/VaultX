@@ -1,10 +1,7 @@
 package com.themrsung.mc.io;
 
 import com.themrsung.mc.economy.*;
-import com.themrsung.mc.economy.property.AccountHolderProperty;
-import com.themrsung.mc.economy.property.AccountHolderPropertyType;
-import com.themrsung.mc.economy.property.HolderProperty;
-import com.themrsung.mc.economy.property.PlayerProperty;
+import com.themrsung.mc.economy.property.*;
 import com.themrsung.mc.util.Coordinate;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -98,8 +95,12 @@ public abstract class VXIO {
         result.add("name: " + p.getName());
 
         switch (p.getType()) {
-            case COORDINATE, DATE, DOUBLE, LONG -> {
+            case COORDINATE, DOUBLE, LONG, STRING -> {
                 result.add("value: " + p.getValue().toString());
+            }
+            case DATE -> {
+                var dp = (DateProperty) p;
+                result.add("value: " + dp.getValue().getTime());
             }
 
             case PLAYER -> {

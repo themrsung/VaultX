@@ -61,16 +61,11 @@ public final class VaultX extends JavaPlugin {
         }
 
         // Register autosave task
-        var autoSaveInterval = getConfig().getLong("autoSaveInterval");
-
-        // Negative interval means autosave is disabled (no idea why anyone would do such thing)
-        if (autoSaveInterval > -1) {
-            getServer().getScheduler().scheduleSyncRepeatingTask(
-                    this,
-                    new AutoSaveTask(this),
-                    autoSaveInterval != 0 ? autoSaveInterval : 5 * 60 * 20,
-                    60 * 20);
-        }
+        getServer().getScheduler().scheduleSyncRepeatingTask(
+                this,
+                new AutoSaveTask(this),
+                5 * 60 * 20,
+                60 * 20);
 
         getLogger().info("VaultX loaded!");
     }
