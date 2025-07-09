@@ -18,7 +18,6 @@ import java.io.IOException;
  */
 public final class VaultX extends JavaPlugin {
     private EconomyX economy;
-    private VaultXConfiguration config;
     private boolean legacyEnabled;
 
     /**
@@ -45,15 +44,6 @@ public final class VaultX extends JavaPlugin {
 
         // Create configuration if absent
         saveDefaultConfig();
-
-        // Load configuration
-        loadConfig();
-        getLogger().info("Configuration loaded!");
-
-        // Config should be non-null by now, but just in case
-        if (config == null) {
-            config = new VaultXConfiguration();
-        }
 
         // Try to find legacy Vault API
         var legacyVault = Bukkit.getPluginManager().getPlugin("Vault");
@@ -87,11 +77,14 @@ public final class VaultX extends JavaPlugin {
         }
 
         // Register autosave task
-        getServer().getScheduler().scheduleSyncRepeatingTask(
-                this,
-                new AutoSaveTask(this),
-                5 * 60 * 20,
-                60 * 20);
+        var autoSaveInterval = getConfig().getLong("autoSaveInterval", 6000);
+        if (autoSaveInterval > 0) { // An interval at or below zero will disable autosave
+            getServer().getScheduler().scheduleSyncRepeatingTask(
+                    this,
+                    new AutoSaveTask(this),
+                    autoSaveInterval,
+                    1200);
+        }
 
         // Register player first join listener
         getServer().getPluginManager().registerEvents(new PlayerAccountInitializationListener(this), this);
@@ -99,18 +92,6 @@ public final class VaultX extends JavaPlugin {
         getLogger().info("Tasks and listeners registered!");
 
         getLogger().info("VaultX loaded!");
-    }
-
-    private void loadConfig() {
-        var autoSaveInterval = getConfig().getLong("autoSaveInterval", 6000);
-        var startingBalance = getConfig().getDouble("startingBalance", 100000);
-        var startingPremiumBalance = getConfig().getLong("startingPremiumBalance", 5);
-
-        config = new VaultXConfiguration(
-                autoSaveInterval,
-                startingBalance,
-                startingPremiumBalance
-        );
     }
 
     private void loadVanillaEconomy() {
