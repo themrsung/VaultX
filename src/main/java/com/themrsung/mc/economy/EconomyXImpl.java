@@ -1,5 +1,7 @@
 package com.themrsung.mc.economy;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.themrsung.mc.VaultX;
 import com.themrsung.mc.event.balance.BalanceIssuedEvent;
 import com.themrsung.mc.event.balance.BalanceRetiredEvent;
@@ -13,6 +15,8 @@ import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -194,8 +198,11 @@ class EconomyXImpl implements EconomyX {
         if (account instanceof VXPlayerImpl vxpi) {
             vxpi.balance += impact;
             return;
+        } else if (account instanceof VXInstitutionImpl vxii) {
+            vxii.balance += impact;
+            return;
         } else if (account instanceof VXPluginUser vxpu) {
-            vxpu.onBalanceModified(this, impact);
+            vxpu.modifyBalance(this, impact);
             return;
         }
 
@@ -206,11 +213,39 @@ class EconomyXImpl implements EconomyX {
         if (account instanceof VXPlayerImpl vxpi) {
             vxpi.premiumBalance += impact;
             return;
+        } else if (account instanceof VXInstitutionImpl vxii) {
+            vxii.premiumBalance += impact;
+            return;
         } else if (account instanceof VXPluginUser vxpu) {
-            vxpu.onPremiumBalanceModified(this, impact);
+            vxpu.modifyPremiumBalance(this, impact);
             return;
         }
 
         throw new UnknownAccountHolderImplementationException(this, account, "Unknown implementation of VXAccountHolder. Cannot modify premium balance!");
+    }
+
+    private static final String savePath = "plugins/VaultX/economy";
+
+    @Override
+    public void save() throws IOException {
+        var dir = new File(savePath);
+        dir.mkdirs();
+
+        var mapper = new ObjectMapper(new YAMLFactory());
+
+        for (VXAccountHolder a : accounts) {
+            if (!(a instanceof VXPluginUser)) {
+                var file = new File(savePath + "/" + a.getUniqueId() + ".yml");
+                mapper.writeValue(file, a);
+            }
+        }
+    }
+
+    @Override
+    public void load() throws IOException {
+
+
+        // Third-party users should not be removed
+        accounts.removeIf(a -> !(a instanceof VXPluginUser));
     }
 }

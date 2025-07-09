@@ -5,6 +5,7 @@ import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -157,4 +158,18 @@ public interface EconomyX {
      * @return {@code true} if the balance was removed, {@code false} otherwise
      */
     boolean retirePremiumBalance(VXAccountHolder debtor, long amount);
+
+    /**
+     * Saves the current state to disk.
+     *
+     * @throws IOException When IO fails
+     */
+    void save() throws IOException;
+
+    /**
+     * Loads the current state from disk. This clears transient variables.
+     *
+     * @throws IOException When IO fails
+     */
+    void load() throws IOException;
 }

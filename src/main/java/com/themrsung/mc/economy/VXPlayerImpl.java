@@ -14,7 +14,7 @@ import java.util.UUID;
  *
  * @see VXPlayer
  */
-class VXPlayerImpl implements VXPlayer {
+class VXPlayerImpl extends VXAbstractAccountHolder implements VXPlayer {
     /**
      * Creates a new player with no balance.
      *
@@ -50,6 +50,11 @@ class VXPlayerImpl implements VXPlayer {
     @Override
     public @Nullable String getName() {
         return player.getName();
+    }
+
+    @Override
+    public @NotNull AccountHolderType getType() {
+        return AccountHolderType.PLAYER;
     }
 
     @Override
