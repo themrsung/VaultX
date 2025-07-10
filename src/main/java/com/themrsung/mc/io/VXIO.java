@@ -181,6 +181,7 @@ public abstract class VXIO {
 
 
         var valueAsString = tryCatchOrElse(() -> valueSplit[1], "");
+        var trimmedValue = valueAsString.substring(1, valueAsString.length() - 1);
 
         switch (type) {
             case STRING -> {
@@ -188,7 +189,7 @@ public abstract class VXIO {
             }
 
             case STRING_ARRAY -> {
-                return AccountHolderProperty.newStringArray(name, valueAsString.split(", "));
+                return AccountHolderProperty.newStringArray(name, trimmedValue.split(", "));
             }
 
             case COORDINATE -> {
@@ -196,7 +197,7 @@ public abstract class VXIO {
             }
 
             case COORDINATE_ARRAY -> {
-                return AccountHolderProperty.newCoordinateArray(name, Arrays.stream(valueAsString.split("}, "))
+                return AccountHolderProperty.newCoordinateArray(name, Arrays.stream(trimmedValue.split("}, "))
                         .map(s -> {
                             try {
                                 return Coordinate.parseCoordinate(s);
@@ -212,7 +213,7 @@ public abstract class VXIO {
             }
 
             case PLAYER_ARRAY -> {
-                return AccountHolderProperty.newPlayerArray(name, Arrays.stream(valueAsString.split(", "))
+                return AccountHolderProperty.newPlayerArray(name, Arrays.stream(trimmedValue.split(", "))
                         .map(VXIO::parsePlayer)
                         .toArray(OfflinePlayer[]::new));
             }
@@ -222,7 +223,7 @@ public abstract class VXIO {
             }
 
             case HOLDER_ARRAY -> {
-                return AccountHolderProperty.newHolderArray(name, Arrays.stream(valueAsString.split(", "))
+                return AccountHolderProperty.newHolderArray(name, Arrays.stream(trimmedValue.split(", "))
                         .map(VXIO::parseHolder)
                         .toArray(VXAccountHolder[]::new));
             }
@@ -237,7 +238,7 @@ public abstract class VXIO {
             }
 
             case DATE_ARRAY -> {
-                return AccountHolderProperty.newDateArray(name, Arrays.stream(valueAsString.split(", "))
+                return AccountHolderProperty.newDateArray(name, Arrays.stream(trimmedValue.split(", "))
                         .map(s -> {
                             try {
                                 return new Date(Long.parseLong(s));
@@ -257,7 +258,7 @@ public abstract class VXIO {
             }
 
             case UUID_ARRAY -> {
-                return AccountHolderProperty.newUniqueIdArray(name, Arrays.stream(valueAsString.split(", "))
+                return AccountHolderProperty.newUniqueIdArray(name, Arrays.stream(trimmedValue.split(", "))
                         .map(s -> {
                             try {
                                 return UUID.fromString(s);
