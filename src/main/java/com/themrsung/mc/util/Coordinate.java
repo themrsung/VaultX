@@ -1,5 +1,7 @@
 package com.themrsung.mc.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Objects;
 
 /**
@@ -91,6 +93,32 @@ public class Coordinate {
 
         return Objects.equals(worldName, c.worldName)
                 && x == c.x && y == c.y && z == c.z;
+    }
+
+    /**
+     * Parses the given coordinate.
+     *
+     * @param s The string
+     * @return The parsed coordinate
+     * @throws IllegalArgumentException When the format is invalid
+     */
+    public static @NotNull Coordinate parseCoordinate(String s) throws IllegalArgumentException {
+        if (s == null) throw new IllegalArgumentException("Invalid input string");
+
+        var parts = s
+                .replace("{", "")
+                .replace("}", "")
+                .replace("[", "")
+                .replace("]", "")
+                .replace(" ", "")
+                .split(",");
+
+        if (parts.length != 4) throw new IllegalArgumentException("Invalid coordinate format");
+        String world = parts[0];
+        double x = Double.parseDouble(parts[1]);
+        double y = Double.parseDouble(parts[2]);
+        double z = Double.parseDouble(parts[3]);
+        return new Coordinate(world, x, y, z);
     }
 
     @Override

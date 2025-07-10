@@ -10,6 +10,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -95,12 +97,11 @@ public abstract class VXIO {
         result.add("name: " + p.getName());
 
         switch (p.getType()) {
-            case COORDINATE, DOUBLE, LONG, STRING -> {
-                result.add("value: " + p.getValue().toString());
-            }
+            case COORDINATE, DOUBLE, LONG, STRING, BOOLEAN, UUID -> result.add("value: " + p.getValue().toString());
+
             case DATE -> {
                 var dp = (DateProperty) p;
-                result.add("value: " + dp.getValue().getTime());
+                result.add("value: " + (dp.getValue() != null ? dp.getValue().getTime() : -1));
             }
 
             case PLAYER -> {
@@ -113,6 +114,38 @@ public abstract class VXIO {
                 var hp = (HolderProperty) p;
                 var ah = hp.getValue();
                 result.add("value: " + (ah != null ? ah.getUniqueId() : "null"));
+            }
+
+            case STRING_ARRAY, COORDINATE_ARRAY, UUID_ARRAY, DOUBLE_ARRAY, LONG_ARRAY, BOOLEAN_ARRAY ->
+                    result.add("value: " + Arrays.toString(Objects.requireNonNullElse(((Object[]) p.getValue()), new Object[0])));
+
+            case DATE_ARRAY -> {
+                var da = (DateArrayProperty) p;
+                result.add("value: " + Arrays.toString(
+                        Arrays.stream(da.getValue())
+                                .mapToLong(d -> d != null ? d.getTime() : -1)
+                                .toArray())
+                );
+            }
+
+            case PLAYER_ARRAY -> {
+                var pa = (PlayerArrayProperty) p;
+                result.add("value: " + Arrays.toString(
+                        Arrays.stream(pa.getValue())
+                                .map(pl -> pl != null ? pl.getUniqueId() : null)
+                                .map(uuid -> uuid != null ? uuid.toString() : "null")
+                                .toArray(String[]::new))
+                );
+            }
+
+            case HOLDER_ARRAY -> {
+                var ha = (HolderArrayProperty) p;
+                result.add("value: " + Arrays.toString(
+                        Arrays.stream(ha.getValue())
+                                .map(h -> h != null ? h.getUniqueId() : null)
+                                .map(uuid -> uuid != null ? uuid.toString() : "null")
+                                .toArray(String[]::new)
+                ));
             }
         }
 
@@ -154,41 +187,44 @@ public abstract class VXIO {
                 return AccountHolderProperty.newString(name, valueAsString);
             }
 
-            case COORDINATE -> {
-                var parts = valueAsString
-                        .replace("{", "")
-                        .replace("}", "")
-                        .replace("[", "")
-                        .replace("]", "")
-                        .replace(" ", "")
-                        .split(",");
+            case STRING_ARRAY -> {
+                return AccountHolderProperty.newStringArray(name, valueAsString.split(", "));
+            }
 
-                if (parts.length != 4) throw new IOException("Invalid coordinate format");
-                String world = parts[0];
-                double x = Double.parseDouble(parts[1]);
-                double y = Double.parseDouble(parts[2]);
-                double z = Double.parseDouble(parts[3]);
-                return AccountHolderProperty.newCoordinate(name, new Coordinate(world, x, y, z));
+            case COORDINATE -> {
+                return AccountHolderProperty.newCoordinate(name, Coordinate.parseCoordinate(valueAsString));
+            }
+
+            case COORDINATE_ARRAY -> {
+                return AccountHolderProperty.newCoordinateArray(name, Arrays.stream(valueAsString.split("}, "))
+                        .map(s -> {
+                            try {
+                                return Coordinate.parseCoordinate(s);
+                            } catch (IllegalArgumentException e) {
+                                return null;
+                            }
+                        })
+                        .toArray(Coordinate[]::new));
             }
 
             case PLAYER -> {
-                try {
-                    var uuid = UUID.fromString(valueAsString);
-                    var offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                    return AccountHolderProperty.newPlayer(name, offlinePlayer);
-                } catch (IllegalArgumentException e) {
-                    return AccountHolderProperty.newPlayer(name, null);
-                }
+                return AccountHolderProperty.newPlayer(name, parsePlayer(valueAsString));
+            }
+
+            case PLAYER_ARRAY -> {
+                return AccountHolderProperty.newPlayerArray(name, Arrays.stream(valueAsString.split(", "))
+                        .map(VXIO::parsePlayer)
+                        .toArray(OfflinePlayer[]::new));
             }
 
             case HOLDER -> {
-                try {
-                    var uuid = UUID.fromString(valueAsString);
-                    var ref = new VXAccountHolderReference(uuid);
-                    return AccountHolderProperty.newHolder(name, ref);
-                } catch (IllegalArgumentException e) {
-                    return AccountHolderProperty.newHolder(name, null);
-                }
+                return AccountHolderProperty.newHolder(name, parseHolder(valueAsString));
+            }
+
+            case HOLDER_ARRAY -> {
+                return AccountHolderProperty.newHolderArray(name, Arrays.stream(valueAsString.split(", "))
+                        .map(VXIO::parseHolder)
+                        .toArray(VXAccountHolder[]::new));
             }
 
             case DATE -> {
@@ -200,6 +236,37 @@ public abstract class VXIO {
                 }
             }
 
+            case DATE_ARRAY -> {
+                return AccountHolderProperty.newDateArray(name, Arrays.stream(valueAsString.split(", "))
+                        .map(s -> {
+                            try {
+                                return new Date(Long.parseLong(s));
+                            } catch (Throwable e) {
+                                return null;
+                            }
+                        }).toArray(Date[]::new));
+            }
+
+            case UUID -> {
+                try {
+                    var uuid = UUID.fromString(valueAsString);
+                    return AccountHolderProperty.newUniqueId(name, uuid);
+                } catch (IllegalArgumentException e) {
+                    throw new IOException("Invalid UUID format");
+                }
+            }
+
+            case UUID_ARRAY -> {
+                return AccountHolderProperty.newUniqueIdArray(name, Arrays.stream(valueAsString.split(", "))
+                        .map(s -> {
+                            try {
+                                return UUID.fromString(s);
+                            } catch (Throwable e) {
+                                return null;
+                            }
+                        }).toArray(UUID[]::new));
+            }
+
             case DOUBLE -> {
                 try {
                     double value = Double.parseDouble(valueAsString);
@@ -207,6 +274,17 @@ public abstract class VXIO {
                 } catch (NumberFormatException e) {
                     throw new IOException("Invalid double format");
                 }
+            }
+
+            case DOUBLE_ARRAY -> {
+                return AccountHolderProperty.newDoubleArray(name, Arrays.stream(valueAsString.split(", "))
+                        .mapToDouble(s -> {
+                            try {
+                                return Double.parseDouble(s);
+                            } catch (NumberFormatException e) {
+                                return 0;
+                            }
+                        }).toArray());
             }
 
             case LONG -> {
@@ -217,9 +295,63 @@ public abstract class VXIO {
                     throw new IOException("Invalid long format");
                 }
             }
+
+            case LONG_ARRAY -> {
+                return AccountHolderProperty.newLongArray(name, Arrays.stream(valueAsString.split(", "))
+                        .mapToLong(s -> {
+                            try {
+                                return Long.parseLong(s);
+                            } catch (NumberFormatException e) {
+                                return 0;
+                            }
+                        }).toArray());
+            }
+
+            case BOOLEAN -> {
+                boolean value = Boolean.parseBoolean(valueAsString);
+                return AccountHolderProperty.newBoolean(name, value);
+            }
+
+            case BOOLEAN_ARRAY -> {
+                var boxedArray = Arrays.stream(valueAsString.split(", "))
+                        .map(Boolean::parseBoolean).toArray(Boolean[]::new);
+                var primArray = new boolean[boxedArray.length];
+
+                for (int i = 0; i < boxedArray.length; i++) {
+                    primArray[i] = boxedArray[i];
+                }
+
+                return AccountHolderProperty.newBooleanArray(name, primArray);
+            }
         }
 
         throw new IOException("Error deserializing: " + name);
+    }
+
+    private static <T> T parseValue(String s, Function<String, T> parser) throws IOException {
+        try {
+            return parser.apply(s);
+        } catch (Throwable e) {
+            throw new IOException("Invalid format", e);
+        }
+    }
+
+    private static @Nullable OfflinePlayer parsePlayer(String s) {
+        try {
+            var uuid = UUID.fromString(s);
+            return Bukkit.getOfflinePlayer(uuid);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private static @Nullable VXAccountHolder parseHolder(String s) {
+        try {
+            var uuid = UUID.fromString(s);
+            return new VXAccountHolderReference(uuid);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     /**
@@ -305,24 +437,38 @@ public abstract class VXIO {
 
         copy.forEach(account -> {
             account.getProperties().forEach(property -> {
-                if (property.getType() != AccountHolderPropertyType.HOLDER || !(property instanceof HolderProperty hp))
-                    return;
-                var holder = hp.getValue();
+                if (property.getType() == AccountHolderPropertyType.HOLDER && property instanceof HolderProperty hp) {
+                    var holder = hp.getValue();
 
-                if (!(holder instanceof VXAccountHolderReference ref)) return;
-                var holderId = ref.getUniqueId();
-                var actualHolder = copy.stream()
-                        .filter(a -> Objects.equals(a.getUniqueId(), holderId))
-                        .findAny()
-                        .orElse(null);
+                    if (!(holder instanceof VXAccountHolderReference ref)) return;
+                    reviveRef(ref, copy, hp::setValue);
+                } else if (property.getType() == AccountHolderPropertyType.HOLDER_ARRAY && property instanceof HolderArrayProperty hap) {
+                    var values = hap.getValue();
+                    if (values == null) return;
 
-                if (actualHolder == null) return;
+                    for (int i = 0; i < values.length; i++) {
+                        if (!(values[i] instanceof VXAccountHolderReference ref)) continue;
 
-                hp.setValue(actualHolder);
+                        var index = i;
+                        reviveRef(ref, copy, h -> values[index] = h);
+                    }
+                }
             });
 
             accounts.add(account);
         });
+    }
+
+    private static void reviveRef(VXAccountHolderReference ref, Set<VXAccountHolder> accounts, Consumer<VXAccountHolder> setter) {
+        var holderId = ref.getUniqueId();
+        var actualHolder = accounts.stream()
+                .filter(a -> Objects.equals(a.getUniqueId(), holderId))
+                .findAny()
+                .orElse(null);
+
+        if (actualHolder == null) return;
+
+        setter.accept(actualHolder);
     }
 
     /**

@@ -76,6 +76,7 @@ class EconomyXImpl implements EconomyX {
 
     @Override
     public boolean addAccount(VXAccountHolder account) {
+        if (accounts.stream().anyMatch(a -> Objects.equals(a.getUniqueId(), account.getUniqueId()))) return false;
         return accounts.add(account);
     }
 

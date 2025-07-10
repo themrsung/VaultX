@@ -1,21 +1,23 @@
 package com.themrsung.mc.economy.property;
 
+import java.util.Date;
+
 /**
- * {@link String} property.
+ * Date array property.
  */
-public class StringProperty extends ObjectProperty<String> {
+public class DateArrayProperty extends ArrayProperty<Date> {
     /**
      * Local constructor.
      *
      * @param name  The name of this property
      * @param value The value of this property
      */
-    StringProperty(String name, String value) {
-        super(name.replace("\n", "").replace(",", ""), value);
+    DateArrayProperty(String name, Date[] value) {
+        super(name, value);
     }
 
     @Override
     public AccountHolderPropertyType getType() {
-        return AccountHolderPropertyType.STRING;
+        return AccountHolderPropertyType.DATE_ARRAY;
     }
 }

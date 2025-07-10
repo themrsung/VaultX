@@ -1,21 +1,23 @@
 package com.themrsung.mc.economy.property;
 
+import java.util.UUID;
+
 /**
- * {@link String} property.
+ * {@link UUID} property.
  */
-public class StringProperty extends ObjectProperty<String> {
+public class UUIDProperty extends ObjectProperty<UUID> {
     /**
      * Local constructor.
      *
      * @param name  The name of this property
      * @param value The value of this property
      */
-    StringProperty(String name, String value) {
-        super(name.replace("\n", "").replace(",", ""), value);
+    UUIDProperty(String name, UUID value) {
+        super(name, value);
     }
 
     @Override
     public AccountHolderPropertyType getType() {
-        return AccountHolderPropertyType.STRING;
+        return AccountHolderPropertyType.UUID;
     }
 }

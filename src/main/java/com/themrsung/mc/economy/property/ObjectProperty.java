@@ -13,7 +13,7 @@ public abstract class ObjectProperty<T> implements AccountHolderProperty<T> {
      * @param value The value of this property
      */
     ObjectProperty(String name, T value) {
-        this.name = name;
+        this.name = name.replace("\n", "");
         this.value = value;
     }
 
