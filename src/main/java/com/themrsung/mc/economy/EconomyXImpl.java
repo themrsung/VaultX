@@ -138,7 +138,7 @@ class EconomyXImpl implements EconomyX {
 
         Bukkit.getPluginManager().callEvent(new BalanceRetiredEvent(debtor, amount));
 
-        return false;
+        return true;
     }
 
     @Override
@@ -190,7 +190,7 @@ class EconomyXImpl implements EconomyX {
 
         Bukkit.getPluginManager().callEvent(new PremiumBalanceRetiredEvent(debtor, amount));
 
-        return false;
+        return true;
     }
 
     // Utilities
